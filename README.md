@@ -269,8 +269,8 @@ $ az deployment group create -g ${RESOURCE_GROUP} \
   --parameters vnetResourceGroupName="${NETWORK_RESOURCE_GROUP}" \
   --parameters subnetName="${MASTER_SUBNET_NAME}"
  
- # Wait until bootstraping ends
- $ ./openshift-install wait-for bootstrap-complete --dir=./install --log-level info
+# Wait until bootstraping ends
+$ ./openshift-install wait-for bootstrap-complete --dir=./install --log-level info
 ```
 
 
