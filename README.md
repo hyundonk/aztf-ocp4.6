@@ -54,6 +54,9 @@ https://docs.openshift.com/container-platform/4.6/installing/installing_azure/in
 # Create install-config.yaml file
 $ mkdir install
 $ ./openshift-install create install-config --dir=install
+
+# Also add a line with "sshKey" field with public key value in 'install/install-config.yaml' as below.
+sshKey: ssh-rsa AAAAB3<hidden>Dj71fNpmdfv0Q==
 ```
 
 Modify 'networking.machineNetwork.cidr' IP address range to your virtual address range.
