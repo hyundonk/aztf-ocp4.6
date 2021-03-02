@@ -348,13 +348,13 @@ $ ./oc adm certificate approve csr-h562r
 certificatesigningrequest.certificates.k8s.io/csr-h562r approved
 
 $ ./oc get node
-NAME                                    STATUS     ROLES    AGE   VERSION
-hyukdemo5-ktrbf-master-0                Ready      master   37m   v1.19.0+f173eb4
-hyukdemo5-ktrbf-master-1                Ready      master   38m   v1.19.0+f173eb4
-hyukdemo5-ktrbf-master-2                Ready      master   38m   v1.19.0+f173eb4
-hyukdemo5-ktrbf-worker-koreacentral-1   NotReady   worker   79s   v1.19.0+f173eb4
-hyukdemo5-ktrbf-worker-koreacentral-2   NotReady   worker   53s   v1.19.0+f173eb4
-hyukdemo5-ktrbf-worker-koreacentral-3   NotReady   worker   73s   v1.19.0+f173eb4
+NAME                                    STATUS   ROLES    AGE     VERSION
+hyukdemo5-ktrbf-master-0                Ready    master   38m     v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-1                Ready    master   39m     v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-2                Ready    master   39m     v1.19.0+f173eb4
+hyukdemo5-ktrbf-worker-koreacentral-1   Ready    worker   2m21s   v1.19.0+f173eb4
+hyukdemo5-ktrbf-worker-koreacentral-2   Ready    worker   115s    v1.19.0+f173eb4
+hyukdemo5-ktrbf-worker-koreacentral-3   Ready    worker   2m15s   v1.19.0+f173eb4
   
 ```
 
