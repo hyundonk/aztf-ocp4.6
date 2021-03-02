@@ -295,6 +295,26 @@ $ az deployment group create -g ${RESOURCE_GROUP} \
   
 ```
 
+### 16) Install and run OC
+
+https://docs.openshift.com/container-platform/4.6/installing/installing_azure/installing-azure-user-infra.html#cli-installing-cli_installing-azure-user-infra
+
+```bash
+$ wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
+$ tar xvzf openshift-client-linux.tar.gz
+$ export KUBECONFIG=./install/auth/kubeconfig
+$ ./oc whoami
+system:admin
+
+$./oc get nodes
+NAME                       STATUS   ROLES    AGE   VERSION
+hyukdemo5-ktrbf-master-0   Ready    master   26m   v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-1   Ready    master   26m   v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-2   Ready    master   26m   v1.19.0+f173eb4
+  
+  
+```
+
 
 
 ## 
