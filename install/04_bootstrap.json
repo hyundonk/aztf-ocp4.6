@@ -206,25 +206,6 @@
           ]
         }
       }
-    },
-    {
-      "apiVersion" : "2018-06-01",
-      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-      "name" : "[concat(variables('clusterNsgName'), '/bootstrap_ssh_in')]",
-      "location" : "[variables('location')]",
-      "dependsOn" : [
-        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
-      ],
-      "properties": {
-        "protocol" : "Tcp",
-        "sourcePortRange" : "*",
-        "destinationPortRange" : "22",
-        "sourceAddressPrefix" : "*",
-        "destinationAddressPrefix" : "*",
-        "access" : "Allow",
-        "priority" : 100,
-        "direction" : "Inbound"
-      }
     }
   ]
 }
