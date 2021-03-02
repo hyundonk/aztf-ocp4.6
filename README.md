@@ -54,6 +54,9 @@ https://docs.openshift.com/container-platform/4.6/installing/installing_azure/in
 # Create install-config.yaml file
 $ mkdir install
 $ ./openshift-install create install-config --dir=install
+
+# Also add a line with "sshKey" field with public key value in 'install/install-config.yaml' as below.
+sshKey: ssh-rsa AAAAB3<hidden>Dj71fNpmdfv0Q==
 ```
 
 Modify 'networking.machineNetwork.cidr' IP address range to your virtual address range.
@@ -268,6 +271,9 @@ $ az deployment group create -g ${RESOURCE_GROUP} \
   --parameters vnetName="${VNET_NAME}" \
   --parameters vnetResourceGroupName="${NETWORK_RESOURCE_GROUP}" \
   --parameters subnetName="${MASTER_SUBNET_NAME}"
+ 
+# Wait until bootstraping ends
+$ ./openshift-install wait-for bootstrap-complete --dir=./install --log-level info
 ```
 
 
@@ -289,6 +295,69 @@ $ az deployment group create -g ${RESOURCE_GROUP} \
   --parameters vnetResourceGroupName="${NETWORK_RESOURCE_GROUP}" \
   --parameters subnetName="${NODE_SUBNET_NAME}"
   
+  
+```
+
+### 16) Install and run OC
+
+https://docs.openshift.com/container-platform/4.6/installing/installing_azure/installing-azure-user-infra.html#cli-installing-cli_installing-azure-user-infra
+
+```bash
+$ wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
+$ tar xvzf openshift-client-linux.tar.gz
+$ export KUBECONFIG=./install/auth/kubeconfig
+$ ./oc whoami
+system:admin
+
+$./oc get nodes
+NAME                       STATUS   ROLES    AGE   VERSION
+hyukdemo5-ktrbf-master-0   Ready    master   26m   v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-1   Ready    master   26m   v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-2   Ready    master   26m   v1.19.0+f173eb4
+  
+  
+```
+
+### 17) Approving the certificate signing requests for your machines
+
+https://docs.openshift.com/container-platform/4.6/installing/installing_azure/installing-azure-user-infra.html#installation-approve-csrs_installing-azure-user-infra
+
+```bash
+$./oc get nodes
+NAME                       STATUS   ROLES    AGE   VERSION
+hyukdemo5-ktrbf-master-0   Ready    master   26m   v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-1   Ready    master   26m   v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-2   Ready    master   26m   v1.19.0+f173eb4
+
+$ ./oc get csr
+NAME        AGE   SIGNERNAME                                    REQUESTOR
+                                CONDITION
+csr-2xsqd   11m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending
+csr-7n9p6   34m   kubernetes.io/kubelet-serving                 system:node:hyukdemo5-ktrbf-master-0                                        Approved,Issued
+csr-9rds2   35m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Approved,Issued
+csr-b2cv2   34m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Approved,Issued
+csr-d2z7d   10m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending
+csr-ffx9t   34m   kubernetes.io/kubelet-serving                 system:node:hyukdemo5-ktrbf-master-1                                        Approved,Issued
+csr-h562r   10m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Pending
+csr-k8n52   35m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   Approved,Issued
+csr-zmzb7   34m   kubernetes.io/kubelet-serving                 system:node:hyukdemo5-ktrbf-master-2                                        Approved,Issued
+
+# Approve CSRs in pending state.
+$ ./oc adm certificate approve csr-2xsqd
+certificatesigningrequest.certificates.k8s.io/csr-2xsqd approved
+$ ./oc adm certificate approve csr-d2z7d
+certificatesigningrequest.certificates.k8s.io/csr-d2z7d approved
+$ ./oc adm certificate approve csr-h562r
+certificatesigningrequest.certificates.k8s.io/csr-h562r approved
+
+$ ./oc get node
+NAME                                    STATUS   ROLES    AGE     VERSION
+hyukdemo5-ktrbf-master-0                Ready    master   38m     v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-1                Ready    master   39m     v1.19.0+f173eb4
+hyukdemo5-ktrbf-master-2                Ready    master   39m     v1.19.0+f173eb4
+hyukdemo5-ktrbf-worker-koreacentral-1   Ready    worker   2m21s   v1.19.0+f173eb4
+hyukdemo5-ktrbf-worker-koreacentral-2   Ready    worker   115s    v1.19.0+f173eb4
+hyukdemo5-ktrbf-worker-koreacentral-3   Ready    worker   2m15s   v1.19.0+f173eb4
   
 ```
 
