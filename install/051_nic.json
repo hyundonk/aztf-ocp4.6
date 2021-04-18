@@ -1,0 +1,79 @@
+{
+  "$schema" : "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion" : "1.0.0.0",
+  "parameters" : {
+    "baseName" : {
+      "type" : "string",
+      "minLength" : 1,
+      "metadata" : {
+        "description" : "Base name to be used in resource names (usually the cluster's Infra ID)"
+      }
+    },
+    "vnetName" : {
+      "type" : "string",
+      "minLength" : 1
+    },
+    "vnetResourceGroupName" : {
+      "type" : "string",
+      "minLength" : 1
+    },
+    "subnetName" : {
+      "type" : "string"
+    },
+    "numberOfMasters" : {
+      "type" : "int",
+      "defaultValue" : 3,
+      "minValue" : 2,
+      "maxValue" : 30,
+      "metadata" : {
+        "description" : "Number of OpenShift masters to deploy"
+      }
+    },
+  },
+  "variables" : {
+    "location" : "[resourceGroup().location]",
+    "virtualNetworkName" : "[parameters('vnetName')]",
+    "virtualNetworkID" : "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "masterSubnetName" : "[parameters('subnetName')]",
+    "masterSubnetRef" : "[concat(variables('virtualNetworkID'), '/subnets/', variables('masterSubnetName'))]",
+    "masterLoadBalancerName" : "[concat(parameters('baseName'), '-public-lb')]",
+    "internalLoadBalancerName" : "[concat(parameters('baseName'), '-internal-lb')]",
+    "copy" : [
+      {
+        "name" : "vmNames",
+        "count" :  "[parameters('numberOfMasters')]",
+        "input" : "[concat(parameters('baseName'), '-master-', copyIndex('vmNames'))]"
+      }
+    ]
+  },
+  "resources" : [
+    {
+      "apiVersion" : "2018-06-01",
+      "type" : "Microsoft.Network/networkInterfaces",
+      "copy" : {
+        "name" : "nicCopy",
+        "count" : "[length(variables('vmNames'))]"
+      },
+      "name" : "[concat(variables('vmNames')[copyIndex()], '-nic')]",
+      "location" : "[variables('location')]",
+      "properties" : {
+        "ipConfigurations" : [
+          {
+            "name" : "pipConfig",
+            "properties" : {
+              "privateIPAllocationMethod" : "Dynamic",
+              "subnet" : {
+                "id" : "[variables('masterSubnetRef')]"
+              },
+              "loadBalancerBackendAddressPools" : [
+                {
+                  "id" : "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('internalLoadBalancerName'), '/backendAddressPools/internal-lb-backend')]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

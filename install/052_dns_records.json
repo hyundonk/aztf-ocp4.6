@@ -1,0 +1,82 @@
+{
+  "$schema" : "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion" : "1.0.0.0",
+  "parameters" : {
+    "baseName" : {
+      "type" : "string",
+      "minLength" : 1,
+      "metadata" : {
+        "description" : "Base name to be used in resource names (usually the cluster's Infra ID)"
+      }
+    },
+    "ResourceGroupName" : {
+      "type" : "string",
+      "minLength" : 1
+    },
+    "numberOfMasters" : {
+      "type" : "int",
+      "defaultValue" : 3,
+      "minValue" : 2,
+      "maxValue" : 30,
+      "metadata" : {
+        "description" : "Number of OpenShift masters to deploy"
+      }
+    },
+    "privateDNSZoneName" : {
+      "type" : "string",
+      "metadata" : {
+        "description" : "Name of the private DNS zone the master nodes are going to be attached to"
+      }
+    }
+  },
+  "variables" : {
+    "location" : "[resourceGroup().location]",
+    "copy" : [
+      {
+        "name" : "vmNames",
+        "count" :  "[parameters('numberOfMasters')]",
+        "input" : "[concat(parameters('baseName'), '-master-', copyIndex('vmNames'))]"
+      }
+    ]
+  },
+  "resources" : [
+    {
+      "apiVersion": "2018-09-01",
+      "type": "Microsoft.Network/privateDnsZones/SRV",
+      "name": "[concat(parameters('privateDNSZoneName'), '/_etcd-server-ssl._tcp')]",
+      "location" : "[variables('location')]",
+      "properties": {
+        "ttl": 60,
+        "copy": [{
+          "name": "srvRecords",
+          "count": "[length(variables('vmNames'))]",
+          "input": {
+            "priority": 0,
+            "weight" : 10,
+            "port" : 2380,
+            "target" : "[concat('etcd-', copyIndex('srvRecords'), '.', parameters('privateDNSZoneName'))]"
+          }
+        }]
+      }
+    },
+    {
+      "apiVersion": "2018-09-01",
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "copy" : {
+        "name" : "dnsCopy",
+        "count" : "[length(variables('vmNames'))]"
+      },
+      "name": "[concat(parameters('privateDNSZoneName'), '/etcd-', copyIndex())]",
+      "location" : "[variables('location')]",
+      "properties": {
+        "ttl": 60,
+        "aRecords": [
+          {
+            "ipv4Address": "[reference(concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('ResourceGroupName'), '/providers/Microsoft.Network/networkInterfaces/', concat(variables('vmNames')[copyIndex()], '-nic')), '2018-06-01').ipConfigurations[0].properties.privateIPAddress]"
+          }
+        ]
+      }
+    }
+
+  ]
+}
