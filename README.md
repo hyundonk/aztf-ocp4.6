@@ -28,7 +28,7 @@ https://docs.openshift.com/container-platform/4.6/installing/installing_azure/in
 
 ```bash
 # Download install file at https://cloud.redhat.com/openshift/install/azure/user-provisioned
-$ wegt https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz
+$ wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz
 $ tar xvzf openshift-install-linux.tar.gz
 # Also download "pull-secret.txt"
 ```
